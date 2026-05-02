@@ -1,35 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { InputForm } from '@/components/InputForm';
-import { TrialCard } from '@/components/TrialCard';
-import { PatientProfileChips } from '@/components/PatientProfileChips';
-import { LoadingSkeleton } from '@/components/LoadingSkeleton';
-import type { MatchResponse } from '@/lib/types';
-
-type State =
-  | { status: 'idle' }
-  | { status: 'loading' }
-  | { status: 'success'; data: MatchResponse }
-  | { status: 'error'; message: string };
 
 export default function Home() {
-  const [state, setState] = useState<State>({ status: 'idle' });
+  const router = useRouter();
 
-  async function handleSubmit(description: string) {
-    setState({ status: 'loading' });
-    try {
-      const res = await fetch('/api/match', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ description }),
-      });
-      if (!res.ok) throw new Error(`Server error: ${res.status}`);
-      const data: MatchResponse = await res.json();
-      setState({ status: 'success', data });
-    } catch (err) {
-      setState({ status: 'error', message: err instanceof Error ? err.message : 'Something went wrong' });
-    }
+  function handleSubmit(description: string) {
+    router.push(`/search?q=${encodeURIComponent(description)}`);
   }
 
   return (
@@ -49,7 +27,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-20">
         {/* Hero */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
@@ -66,52 +44,12 @@ export default function Home() {
         </div>
 
         {/* Input card */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
-          <InputForm onSubmit={handleSubmit} isLoading={state.status === 'loading'} />
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-2xl mx-auto">
+          <InputForm onSubmit={handleSubmit} isLoading={false} />
         </div>
 
-        {/* Results area */}
-        {state.status === 'loading' && <LoadingSkeleton />}
-
-        {state.status === 'error' && (
-          <div className="bg-red-50 border border-red-100 rounded-2xl p-6 text-center">
-            <p className="text-red-700 font-medium mb-1">Something went wrong</p>
-            <p className="text-red-500 text-sm">{state.message}</p>
-          </div>
-        )}
-
-        {state.status === 'success' && (
-          <div className="space-y-6">
-            <PatientProfileChips profile={state.data.patient} />
-
-            {state.data.matches.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
-                <div className="text-5xl mb-4">🔍</div>
-                <p className="font-semibold text-gray-900 mb-2">No matching trials found</p>
-                <p className="text-gray-500 text-sm max-w-sm mx-auto">
-                  Try broadening your description, or check back — new trials are added regularly.
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center justify-between">
-                  <h2 className="font-semibold text-gray-900">
-                    {state.data.matches.length} trial{state.data.matches.length !== 1 ? 's' : ''} found
-                  </h2>
-                  <span className="text-xs text-gray-400">Sorted by match strength</span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {state.data.matches.map((match) => (
-                    <TrialCard key={match.nctId} match={match} />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Footer note */}
-        <p className="text-center text-xs text-gray-300 mt-12">
+        {/* Trust note */}
+        <p className="text-center text-xs text-gray-300 mt-8">
           For informational purposes only. Always consult a healthcare provider before enrolling in a clinical trial.
         </p>
       </main>

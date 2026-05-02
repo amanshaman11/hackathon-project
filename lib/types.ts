@@ -32,6 +32,7 @@ export type Trial = {
 export type MatchResult = {
   nctId: string;
   matchScore: 'high' | 'medium' | 'low';
+  scoreValue?: number; // 0-100, optional — falls back to categorical mapping
   whyEligible: string[];
   whyNotEligible: string[];
   simplifiedSummary: string;
