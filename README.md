@@ -1,4 +1,4 @@
-# 🧠 TrialMatch AI
+# TrialMatch AI
 
 *Intelligent Patient-to-Trial Matching*
 
