@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { TrialRow } from '@/components/TrialRow';
 import { PatientProfileChips } from '@/components/PatientProfileChips';
 import { getMockResults } from '@/lib/mockData';
+import { Footer } from '@/components/Footer';
 import type { MatchResponse } from '@/lib/types';
 
 type State =
@@ -148,6 +149,7 @@ export default function SearchPage() {
       }>
         <SearchResults />
       </Suspense>
+      <Footer />
     </div>
   );
 }

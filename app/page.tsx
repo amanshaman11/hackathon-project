@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { InputForm } from '@/components/InputForm';
+import { Footer } from '@/components/Footer';
 
 export default function Home() {
   const router = useRouter();
@@ -48,11 +49,8 @@ export default function Home() {
           <InputForm onSubmit={handleSubmit} isLoading={false} />
         </div>
 
-        {/* Trust note */}
-        <p className="text-center text-xs text-gray-300 mt-8">
-          For informational purposes only. Always consult a healthcare provider before enrolling in a clinical trial.
-        </p>
       </main>
+      <Footer />
     </div>
   );
 }
