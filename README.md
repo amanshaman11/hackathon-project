@@ -1,6 +1,10 @@
 # TrialMatch AI
 
 *Intelligent Patient-to-Trial Matching*
+[Gitrepo](https://github.com/amanshaman11/hackathon-project)
+
+## Beta Testing 
+Follow the instructions to get access to our platform:
 
 ## The Problem
 Patients struggle to find clinical trials they qualify for. Manual search is slow, complex, and full of medical jargon.
