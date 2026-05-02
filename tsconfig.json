@@ -21,7 +21,9 @@
         "name": "next"
       }
     ],
-    "paths": {},
+    "paths": {
+      "@/*": ["./*"]
+    },
     "target": "ES2017"
   },
   "include": [

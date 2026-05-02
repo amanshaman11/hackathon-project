@@ -1,17 +1,17 @@
-<<<<<<< HEAD
 # TrialMatch AI
 
 *Intelligent Patient-to-Trial Matching*
 
-[Gitrepo](https://github.com/amanshaman11/hackathon-project)
+[GitHub Repo](https://github.com/amanshaman11/hackathon-project)
 
-## Beta Testing 
-Follow the instructions to get access to our platform:
+> Built for BeaverHacks — helping patients find options faster.
 
 ## The Problem
+
 Patients struggle to find clinical trials they qualify for. Manual search is slow, complex, and full of medical jargon.
 
 ## Our Solution
+
 Enter basic medical details → AI scans real trial databases → Get matched trials with clear, simple explanations.
 
 ## Team
@@ -23,35 +23,39 @@ Enter basic medical details → AI scans real trial databases → Get matched tr
 | Amirkhan Imanbay | AI / Logic Engineer – Gemini API integration, prompts, matching logic |
 | Leo Sarri | Product / Demo Lead – pitch script, end-to-end integration, fallback plan |
 
-## How It Works
+---
 
-1. User enters condition, age, basic health info
-2. Backend fetches relevant trials (clinicaltrials.gov)
-3. AI analyzes eligibility + explains in plain language
-4. Frontend shows ranked matches with scores
+## Getting Started
 
-## Tech Stack
+### 1. Add your Gemini API key
 
-- Frontend: Next.js
-- Backend: API routes
-- AI: Google Gemini API
-- Data: ClinicalTrials.gov
+```bash
+cp .env.local.example .env.local
+# paste your GEMINI_API_KEY inside
+```
 
-## Demo Ready
+### 2. Fetch trial data (one-time)
 
-- Clean UI with example inputs
-- Smart AI reasoning (not just keyword search)
-- 2-min pitch + fallback demo prepared
+```bash
+npm run fetch-trials
+# writes data/trials.json (~300 recruiting trials)
+```
+
+### 3. Run the dev server
+
+```bash
+npm run dev
+# open http://localhost:3000
+```
 
 ---
 
-Built for BeaverHacks — helping patients find options faster.
-=======
-# AI Clinical Trial Navigator
+## Tech Stack
 
-An AI-powered clinical trial matching system that helps patients discover and understand relevant clinical trials based on their medical information.
-
-Instead of relying on manual filters like traditional platforms (ClinicalTrials.gov), users input a natural-language description of their condition. The AI extracts structured medical data, matches it against real clinical trial data, and explains eligibility in plain English.
+- **Frontend**: Next.js 15 (App Router) + TypeScript + Tailwind CSS
+- **AI**: Google Gemini (`gemini-2.0-flash`) via `@google/genai`
+- **Data**: ClinicalTrials.gov v2 API (scraped once at build time → `data/trials.json`)
+- No auth, no database
 
 ---
 
@@ -68,7 +72,7 @@ POST /api/match
         │
         ├── (2) lib/matcher.ts → findCandidates()     ── deterministic, no AI
         │       fuzzy condition match + age fit + status=RECRUITING
-        │       returns top 8 trials
+        │       returns top 8 candidates
         │
         └── (3) lib/ai.ts → analyzeMatches()          ── Gemini call #2 (batched)
                 → per trial: matchScore, whyEligible[], simplifiedSummary, nextStep
@@ -77,41 +81,7 @@ POST /api/match
                         Results dashboard (cards)
 ```
 
-Two Gemini calls per request, regardless of trial count — fast and cheap.
-
----
-
-## Stack
-
-- **Frontend**: Next.js 15 (App Router) + TypeScript + Tailwind CSS
-- **AI**: Google Gemini (`gemini-2.0-flash`) via `@google/genai`
-- **Data**: ~300 real trials scraped once from ClinicalTrials.gov v2 API → `data/trials.json`
-- **No auth, no database, no overengineering**
-
----
-
-## Getting Started
-
-### 1. Add your Gemini API key
-
-```bash
-cp .env.local.example .env.local
-# then edit .env.local and paste your key
-```
-
-### 2. Fetch trial data (one-time)
-
-```bash
-npm run fetch-trials
-# writes data/trials.json (~300 recruiting trials across common conditions)
-```
-
-### 3. Run the dev server
-
-```bash
-npm run dev
-# open http://localhost:3000
-```
+Two Gemini calls per request, regardless of trial count — fast and predictable.
 
 ---
 
@@ -148,38 +118,20 @@ scripts/
 
 ## Data Pipeline
 
-`scripts/fetchTrials.ts` calls the ClinicalTrials.gov v2 API (no key needed) across 10 condition seeds:
+`scripts/fetchTrials.ts` hits the ClinicalTrials.gov v2 API (no key needed) across 10 condition seeds:
 
-> lung cancer, breast cancer, diabetes, alzheimer, heart failure, parkinson, crohn, multiple sclerosis, asthma, depression
+> lung cancer, breast cancer, diabetes, alzheimer, heart failure, parkinson, crohn disease, multiple sclerosis, asthma, depression
 
-Each trial is normalized to:
-
-```ts
-type Trial = {
-  nctId: string;
-  title: string;
-  conditions: string[];
-  briefSummary: string;
-  eligibilityCriteria: string;
-  minAge?: number;
-  maxAge?: number;
-  sex?: 'ALL' | 'MALE' | 'FEMALE';
-  status: string;
-  phases: string[];
-  locations: { facility: string; city: string; state?: string; country: string; contact?: string }[];
-  url: string;
-}
-```
+Dedupes by NCT ID, keeps ~300 recruiting trials, writes `data/trials.json`.
 
 ---
 
 ## AI Layer (`lib/ai.ts`)
 
-**`extractPatientProfile(description)`** — Gemini call #1
-
-Extracts structured profile from free text:
+**Call #1 — `extractPatientProfile(description)`**
 
 ```ts
+// output shape
 {
   conditions: string[],
   age?: number,
@@ -189,32 +141,19 @@ Extracts structured profile from free text:
 }
 ```
 
-**`analyzeMatches(profile, candidates)`** — Gemini call #2 (batched)
-
-Returns per trial:
+**Call #2 — `analyzeMatches(profile, candidates)`** (all candidates in one batched prompt)
 
 ```ts
+// output shape per trial
 {
   nctId: string,
   matchScore: 'high' | 'medium' | 'low',
   whyEligible: string[],      // 2–4 bullet points
-  whyNotEligible: string[],   // empty if fully eligible
+  whyNotEligible: string[],   // concerns / unknowns
   simplifiedSummary: string,  // plain English, 2–3 sentences
   nextStep: string            // single actionable sentence
 }
 ```
-
----
-
-## Matcher (`lib/matcher.ts`)
-
-Pure deterministic logic, no AI:
-
-1. Filter `status === 'RECRUITING'`
-2. Fuzzy condition match (lowercased Jaccard similarity + substring)
-3. Filter by `[minAge, maxAge]` if patient age is known
-4. Filter by sex if specified
-5. Sort by condition score, return top 8
 
 ---
 
@@ -224,27 +163,18 @@ Input: *"My dad is 62, has non-small cell lung cancer stage III, already did che
 
 ```json
 {
-  "patient": {
-    "conditions": ["non-small cell lung cancer"],
-    "age": 62,
-    "priorTreatments": ["chemotherapy"],
-    "notes": "stage III"
-  },
+  "patient": { "conditions": ["non-small cell lung cancer"], "age": 62, "priorTreatments": ["chemotherapy"], "notes": "stage III" },
   "matches": [
     {
       "matchScore": "high",
       "whyEligible": [
-        "Patient has non-small cell lung cancer matching the study target",
+        "Condition matches the study target (non-small cell lung cancer)",
         "Age 62 is within the 18–75 eligibility range",
-        "Prior chemotherapy is listed as an allowed prior treatment"
+        "Prior chemotherapy is an allowed prior treatment"
       ],
       "simplifiedSummary": "This study tests a new immunotherapy drug for lung cancer patients who have already tried chemotherapy.",
-      "nextStep": "Contact the study site in Portland, OR — recruiting now.",
-      "trial": {
-        "title": "Pembrolizumab + Docetaxel for Stage III NSCLC",
-        "status": "RECRUITING",
-        "url": "https://clinicaltrials.gov/study/NCT0xxxxxxx"
-      }
+      "nextStep": "Contact the study site in Portland, OR — currently recruiting.",
+      "trial": { "title": "Pembrolizumab + Docetaxel for Stage III NSCLC", "status": "RECRUITING" }
     }
   ]
 }
@@ -256,29 +186,27 @@ Input: *"My dad is 62, has non-small cell lung cancer stage III, already did che
 
 | Step | Task | Est. |
 |------|------|------|
-| 1 | `lib/types.ts` — shared types | 5 min |
-| 2 | `scripts/fetchTrials.ts` — write & run | 25 min |
-| 3 | `lib/matcher.ts` — filter + rank logic | 15 min |
-| 4 | `lib/ai.ts` — Gemini SDK + two functions | 30 min |
-| 5 | `app/api/match/route.ts` — wire it all | 10 min |
-| 6 | UI — page + all components | 45 min |
-| 7 | Polish — error states, empty state, mobile | 20 min |
+| 1 | `lib/types.ts` | 5 min |
+| 2 | `scripts/fetchTrials.ts` + run | 25 min |
+| 3 | `lib/matcher.ts` | 15 min |
+| 4 | `lib/ai.ts` + Gemini SDK | 30 min |
+| 5 | `app/api/match/route.ts` | 10 min |
+| 6 | UI — page + components | 45 min |
+| 7 | Polish + demo prep | 20 min |
 
 **Total: ~2.5 hours**
 
 ---
 
-## Out of Scope (intentional)
+## Out of Scope
 
 - Authentication / user accounts
-- Database (everything in-memory from JSON)
-- Live ClinicalTrials.gov API calls at request time
-- Saving or sharing results
-- HIPAA/PHI handling (demo only — no real patient data stored)
+- Database
+- Live API calls at request time (data is pre-fetched)
+- HIPAA compliance (demo only)
 
 ---
 
-## Note on Data Freshness
+## Data Freshness
 
-`data/trials.json` is frozen at scrape time. For a hackathon demo this is fine. If the demo runs more than a week after the initial scrape, re-run `npm run fetch-trials` before judging.
->>>>>>> eef8866 (initial commit)
+`data/trials.json` is frozen at scrape time. Re-run `npm run fetch-trials` before the judging session if it's been more than a few days.
