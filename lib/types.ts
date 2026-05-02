@@ -43,4 +43,8 @@ export type MatchResult = {
 export type MatchResponse = {
   patient: PatientProfile;
   matches: MatchResult[];
+  meta?: {
+    aiUsed: boolean;
+    trialSource: 'clinicaltrials.gov' | 'mock_fallback';
+  };
 };

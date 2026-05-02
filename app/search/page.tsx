@@ -4,7 +4,6 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { TrialRow } from '@/components/TrialRow';
 import { PatientProfileChips } from '@/components/PatientProfileChips';
-import { getMockResults } from '@/lib/mockData';
 import { Footer } from '@/components/Footer';
 import type { MatchResponse } from '@/lib/types';
 
@@ -39,10 +38,17 @@ function SearchResults() {
       return;
     }
     setState({ status: 'loading' });
-    // TODO: swap getMockResults for a real fetch once /api/match is ready
-    setTimeout(() => {
-      setState({ status: 'success', data: getMockResults(query) });
-    }, 1200);
+    fetch('/api/match', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: query }),
+    })
+      .then((res) => {
+        if (!res.ok) return res.json().then((e) => { throw new Error(e.error ?? `Server error ${res.status}`); });
+        return res.json() as Promise<MatchResponse>;
+      })
+      .then((data) => setState({ status: 'success', data }))
+      .catch((err) => setState({ status: 'error', message: err instanceof Error ? err.message : 'Something went wrong' }));
   }, [query, router]);
 
   return (

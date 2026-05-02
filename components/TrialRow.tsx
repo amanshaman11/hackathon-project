@@ -34,51 +34,51 @@ export function TrialRow({ match, index }: { match: MatchResult; index: number }
     : null;
 
   return (
-    <div className="bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-start gap-4 p-5">
+    <div className="relative bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+      {/* View study — always top-right */}
+      <a
+        href={trial.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute top-4 right-4 inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 border border-blue-100 hover:border-blue-300 bg-white rounded-lg px-3 py-1.5 transition-colors z-10"
+      >
+        View study
+        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+        </svg>
+      </a>
+
+      <div className="flex items-start gap-4 p-5 pr-32">
         {/* Score */}
         <ScoreBadge score={score} />
 
         {/* Main content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-3 flex-wrap">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <span className="text-xs font-medium bg-green-50 text-green-700 border border-green-100 px-2 py-0.5 rounded-full">
-                  Recruiting
-                </span>
-                {trial.phases.length > 0 && (
-                  <span className="text-xs text-gray-400 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-full">
-                    {trial.phases.join(', ')}
-                  </span>
-                )}
-                {locationStr && (
-                  <span className="text-xs text-gray-400 flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                    </svg>
-                    {locationStr}
-                  </span>
-                )}
-              </div>
-              <h3 className="font-semibold text-gray-900 text-[15px] leading-snug">
-                {trial.title}
-              </h3>
-            </div>
-
-            <a
-              href={trial.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="shrink-0 inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 border border-blue-100 hover:border-blue-300 rounded-lg px-3 py-1.5 transition-colors"
-            >
-              View study
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-              </svg>
-            </a>
+          {/* Badges row */}
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="text-xs font-medium bg-green-50 text-green-700 border border-green-100 px-2 py-0.5 rounded-full">
+              Recruiting
+            </span>
+            {trial.phases.length > 0 && (
+              <span className="text-xs text-gray-400 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-full">
+                {trial.phases.join(', ')}
+              </span>
+            )}
+            {locationStr && (
+              <span className="text-xs text-gray-400 flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                </svg>
+                {locationStr}
+              </span>
+            )}
           </div>
+
+          {/* Title */}
+          <h3 className="font-semibold text-gray-900 text-[15px] leading-snug">
+            {trial.title}
+          </h3>
 
           {/* Why it matches */}
           {match.whyEligible.length > 0 && (
