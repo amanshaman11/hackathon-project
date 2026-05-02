@@ -6,10 +6,44 @@ import {
   extractPatientProfileWithGemini,
   isGeminiConfigured,
 } from '@/lib/ai';
+import { fetchStudiesFromCtGov } from '@/lib/clinicalTrialsGovClient';
+import { buildMatchListSearchParams } from '@/lib/clinicalTrialsGovSearch';
+import { mapCtgovStudiesToTrials } from '@/lib/mapCtgovStudyToTrial';
+import type { PatientProfile, Trial } from '@/lib/types';
+
+export const dynamic = 'force-dynamic';
 
 type MatchRequestBody = {
   description?: string;
 };
+
+async function loadCandidateTrialsFromClinicalTrialsGov(
+  profile: PatientProfile,
+): Promise<{ trials: Trial[]; source: 'clinicaltrials.gov' | 'mock_fallback' }> {
+  const primaryParams = buildMatchListSearchParams(profile);
+
+  try {
+    const first = await fetchStudiesFromCtGov(primaryParams);
+    let trials = mapCtgovStudiesToTrials(first.studies);
+
+    if (trials.length === 0 && primaryParams.has('query.cond')) {
+      const fallback = new URLSearchParams(primaryParams);
+      fallback.delete('query.cond');
+      fallback.set('pageSize', '40');
+      const second = await fetchStudiesFromCtGov(fallback);
+      trials = mapCtgovStudiesToTrials(second.studies);
+    }
+
+    if (trials.length === 0) {
+      return { trials: MOCK_TRIALS, source: 'mock_fallback' };
+    }
+
+    return { trials, source: 'clinicaltrials.gov' };
+  } catch (error) {
+    console.warn('ClinicalTrials.gov fetch failed; using mock trials.', error);
+    return { trials: MOCK_TRIALS, source: 'mock_fallback' };
+  }
+}
 
 export async function POST(request: Request) {
   let body: MatchRequestBody;
@@ -48,7 +82,10 @@ export async function POST(request: Request) {
       : null;
     const patient = aiPatient ?? heuristicPatient;
 
-    const baseMatches = buildMatches(patient, MOCK_TRIALS);
+    const { trials: candidateTrials, source: trialSource } =
+      await loadCandidateTrialsFromClinicalTrialsGov(patient);
+
+    const baseMatches = buildMatches(patient, candidateTrials);
     const aiMatches = isGeminiConfigured()
       ? await analyzeMatchesWithGemini(patient, baseMatches).catch((error) => {
           console.warn('Gemini trial analysis failed; using deterministic output.', error);
@@ -63,6 +100,7 @@ export async function POST(request: Request) {
         matches,
         meta: {
           aiUsed: Boolean(aiPatient || aiMatches),
+          trialSource,
         },
       },
       { status: 200 },
