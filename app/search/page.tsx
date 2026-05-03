@@ -8,6 +8,7 @@ import { InputForm } from '@/components/InputForm';
 import { Footer } from '@/components/Footer';
 import { HomeSideRails } from '@/components/HomeSideRails';
 import { AppNav } from '@/components/AppNav';
+import { decodeHtmlEntities } from '@/lib/decodeHtmlEntities';
 import type { MatchResponse } from '@/lib/types';
 
 type State =
@@ -32,7 +33,7 @@ function RowSkeleton() {
 function SearchResults() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const query = searchParams.get('q') ?? '';
+  const query = decodeHtmlEntities(searchParams.get('q') ?? '');
   const country = searchParams.get('country') ?? '';
   const [state, setState] = useState<State>({ status: 'loading' });
 

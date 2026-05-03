@@ -1,3 +1,4 @@
+import { decodeHtmlEntities } from '@/lib/decodeHtmlEntities';
 import type { MatchResult, PatientProfile } from '@/lib/types';
 
 const GEMINI_MODEL = 'gemini-2.0-flash';
@@ -95,17 +96,22 @@ Patient description:
   if (!parsed) return null;
 
   const conditions = Array.isArray(parsed.conditions)
-    ? parsed.conditions.filter((v): v is string => typeof v === 'string')
+    ? parsed.conditions
+        .filter((v): v is string => typeof v === 'string')
+        .map(decodeHtmlEntities)
     : [];
   const priorTreatments = Array.isArray(parsed.priorTreatments)
-    ? parsed.priorTreatments.filter((v): v is string => typeof v === 'string')
+    ? parsed.priorTreatments
+        .filter((v): v is string => typeof v === 'string')
+        .map(decodeHtmlEntities)
     : [];
   const age = typeof parsed.age === 'number' ? parsed.age : undefined;
   const sex =
     parsed.sex === 'male' || parsed.sex === 'female' || parsed.sex === 'other'
       ? parsed.sex
       : undefined;
-  const notes = typeof parsed.notes === 'string' ? parsed.notes : description;
+  const notesRaw = typeof parsed.notes === 'string' ? parsed.notes : description;
+  const notes = decodeHtmlEntities(notesRaw);
 
   return {
     conditions,
@@ -187,19 +193,25 @@ ${JSON.stringify(trialsPayload)}
         ? item.matchScore
         : 'medium';
     const whyEligible = Array.isArray(item.whyEligible)
-      ? item.whyEligible.filter((v): v is string => typeof v === 'string')
+      ? item.whyEligible
+          .filter((v): v is string => typeof v === 'string')
+          .map(decodeHtmlEntities)
       : [];
     const whyNotEligible = Array.isArray(item.whyNotEligible)
-      ? item.whyNotEligible.filter((v): v is string => typeof v === 'string')
+      ? item.whyNotEligible
+          .filter((v): v is string => typeof v === 'string')
+          .map(decodeHtmlEntities)
       : [];
-    const simplifiedSummary =
+    const simplifiedSummary = decodeHtmlEntities(
       typeof item.simplifiedSummary === 'string'
         ? item.simplifiedSummary
-        : 'This trial may align with the patient profile based on available data.';
-    const nextStep =
+        : 'This trial may align with the patient profile based on available data.',
+    );
+    const nextStep = decodeHtmlEntities(
       typeof item.nextStep === 'string'
         ? item.nextStep
-        : 'Contact the study site to verify eligibility and enrollment details.';
+        : 'Contact the study site to verify eligibility and enrollment details.',
+    );
 
     enrichedById.set(item.nctId, {
       matchScore,
