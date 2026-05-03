@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { MAX_DESCRIPTION_LENGTH } from '@/lib/limits';
+import { rateLimitResponse } from '@/lib/rateLimit';
 import { buildMatches, extractPatientProfile } from '@/lib/matchEngine';
 import { MOCK_TRIALS } from '@/lib/mockTrials';
 import {
@@ -48,6 +50,9 @@ async function loadCandidateTrialsFromClinicalTrialsGov(
 }
 
 export async function POST(request: Request) {
+  const limited = rateLimitResponse(request, 'match');
+  if (limited) return limited;
+
   let body: MatchRequestBody;
 
   try {
@@ -70,6 +75,13 @@ export async function POST(request: Request) {
   if (description.length < 10) {
     return NextResponse.json(
       { error: 'Please provide a bit more clinical context.' },
+      { status: 400 },
+    );
+  }
+
+  if (description.length > MAX_DESCRIPTION_LENGTH) {
+    return NextResponse.json(
+      { error: `Description must be at most ${MAX_DESCRIPTION_LENGTH} characters.` },
       { status: 400 },
     );
   }

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { COUNTRIES } from '@/lib/countries';
+import { MAX_DESCRIPTION_LENGTH } from '@/lib/limits';
 
 const EXAMPLES = [
   'My dad is 62, has non-small cell lung cancer stage III, already did chemotherapy',
@@ -74,7 +75,10 @@ export function InputForm({ onSubmit, isLoading, defaultValue = '', defaultCount
           <textarea
             ref={textareaRef}
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) =>
+              setValue(e.target.value.slice(0, MAX_DESCRIPTION_LENGTH))
+            }
+            maxLength={MAX_DESCRIPTION_LENGTH}
             onFocus={() => setHasFocused(true)}
             placeholder={hasFocused ? "Describe the patient's condition — age, diagnosis, prior treatments..." : ''}
             rows={4}
@@ -95,6 +99,9 @@ export function InputForm({ onSubmit, isLoading, defaultValue = '', defaultCount
           )}
 
           {/* Country dropdown — bottom-left inside textarea */}
+          <div className="absolute bottom-2.5 right-2 z-10 text-[11px] tabular-nums text-gray-400">
+            {value.length}/{MAX_DESCRIPTION_LENGTH}
+          </div>
           <div className="absolute bottom-2.5 left-2 z-10">
             <div className="relative flex items-center">
               <svg

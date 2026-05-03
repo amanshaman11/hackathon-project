@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { rateLimitResponse } from '@/lib/rateLimit';
 import { fetchStudiesFromCtGov } from '@/lib/clinicalTrialsGovClient';
 
 const MAX_PAGE_SIZE = 100;
@@ -8,6 +9,9 @@ const MAX_PAGE_SIZE = 100;
  * `{ studies?, nextPageToken?, totalCount? }` from GET /api/v2/studies.
  */
 export async function proxyCtGovStudiesGet(request: Request): Promise<Response> {
+  const limited = rateLimitResponse(request, 'proxy');
+  if (limited) return limited;
+
   const incoming = new URL(request.url).searchParams;
   const params = new URLSearchParams(incoming);
 
