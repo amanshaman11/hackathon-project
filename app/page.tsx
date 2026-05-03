@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { InputForm } from '@/components/InputForm';
 import { Footer } from '@/components/Footer';
+import { HomeSideRails } from '@/components/HomeSideRails';
+import { AppNav } from '@/components/AppNav';
 
 const STEPS = [
   {
@@ -85,7 +87,7 @@ const FEATURES = [
     title: 'Plain English, always',
     description:
       'Complex medical protocols are summarized in simple language. You\'ll know what a trial is about in seconds.',
-    color: 'bg-purple-50 text-purple-600 border-purple-100',
+    color: 'bg-teal-50 text-teal-700 border-teal-100',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
@@ -102,40 +104,48 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Nav */}
-      <nav className="border-b border-gray-100 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center">
-              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
-              </svg>
-            </div>
-            <span className="font-bold text-gray-900 text-sm">TrialMatch AI</span>
-          </div>
-          <span className="text-xs text-gray-400 hidden sm:block">Built for BeaverHacks</span>
-        </div>
-      </nav>
+    <div className="relative min-h-screen overflow-x-hidden bg-gradient-to-b from-slate-50 via-teal-50/25 to-gray-50">
+      <HomeSideRails />
+
+      <AppNav />
 
       <main>
         {/* ── Hero + input ── */}
-        <section className="max-w-5xl mx-auto px-4 sm:px-6 py-20">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-              AI-Powered Matching
-            </div>
-            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-              Find Clinical Trials<br />
-              <span className="text-blue-600">That Match You</span>
-            </h1>
-            <p className="text-lg text-gray-500 max-w-xl mx-auto">
-              Describe your condition in plain language — our AI finds real, recruiting trials and explains exactly why you may qualify.
-            </p>
+        <section className="relative isolate overflow-hidden">
+          {/* Drifting mesh + noise (purely decorative) */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-[-20%] h-[620px] -z-10 hero-surface-noise"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_-10%,rgba(45,212,191,0.22),transparent_52%),radial-gradient(ellipse_at_80%_20%,rgba(59,130,246,0.18),transparent_46%),linear-gradient(to_bottom,rgba(255,255,255,0.95),transparent)]" />
+            <div className="absolute -left-24 top-20 h-[min(560px,90vw)] w-[min(560px,90vw)] rounded-[40%] bg-teal-400/35 blur-[100px] mix-blend-multiply animate-blob-drift-a" />
+            <div className="absolute -right-16 top-32 h-[min(480px,75vw)] w-[min(480px,75vw)] rounded-[45%] bg-blue-500/28 blur-[90px] mix-blend-multiply animate-blob-drift-b" />
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 max-w-2xl mx-auto">
-            <InputForm onSubmit={handleSubmit} isLoading={false} />
+
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pt-20">
+            <div className="text-center mb-10 max-w-3xl mx-auto">
+              <div
+                className="inline-flex items-center gap-2 rounded-full border border-teal-200/70 bg-white/80 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-800 shadow-sm shadow-teal-900/5 backdrop-blur-sm animate-hero-rise [animation-delay:40ms]"
+              >
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.9)]" />
+                AI-powered matching
+              </div>
+              <h1 className="mt-8 font-display text-[2.1rem] font-semibold tracking-tight text-slate-900 sm:text-[2.85rem] sm:leading-[1.1] leading-[1.15]">
+                <span className="block animate-hero-rise [animation-delay:90ms]">Find Clinical Trials</span>
+                <span className="mt-3 block animate-hero-rise [animation-delay:160ms]">
+                  <span className="text-gradient-shift pb-1">that fit you.</span>
+                </span>
+              </h1>
+              <p className="mx-auto mt-6 max-w-lg text-[15px] leading-relaxed text-slate-600 sm:text-lg animate-hero-rise [animation-delay:240ms]">
+                Describe your condition in plain language — our AI finds real recruiting studies and explains why you might qualify.
+              </p>
+            </div>
+
+            <div className="mx-auto max-w-2xl rounded-3xl border border-white/70 bg-white/90 p-1 shadow-xl shadow-teal-900/[0.07] backdrop-blur-md animate-hero-rise [animation-delay:300ms]">
+              <div className="rounded-[1.35rem] border border-slate-100 bg-white/98 p-5 sm:p-6">
+                <InputForm onSubmit={handleSubmit} isLoading={false} />
+              </div>
+            </div>
           </div>
         </section>
 
@@ -176,15 +186,19 @@ export default function Home() {
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-              {STEPS.map((step) => (
-                <div key={step.number} className="flex flex-col items-start">
+              {STEPS.map((step, idx) => (
+                <div
+                  key={step.number}
+                  className="animate-step-in flex flex-col items-start"
+                  style={{ animationDelay: `${320 + idx * 95}ms` }}
+                >
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-100 text-teal-700 flex items-center justify-center shadow-sm shadow-teal-900/5">
                       {step.icon}
                     </div>
-                    <span className="text-xs font-bold text-blue-300 tracking-widest">{step.number}</span>
+                    <span className="text-xs font-bold text-teal-400 tracking-widest">{step.number}</span>
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">{step.title}</h3>
+                  <h3 className="font-display font-semibold text-gray-900 mb-2">{step.title}</h3>
                   <p className="text-sm text-gray-500 leading-relaxed">{step.description}</p>
                 </div>
               ))}

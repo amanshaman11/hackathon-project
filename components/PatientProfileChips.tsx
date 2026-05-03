@@ -12,15 +12,15 @@ export function PatientProfileChips({ profile }: { profile: PatientProfile }) {
   if (chips.length === 0) return null;
 
   return (
-    <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
-      <p className="text-xs font-semibold text-blue-500 uppercase tracking-wider mb-2">AI understood</p>
+    <div className="rounded-2xl border border-teal-200/70 bg-teal-50/50 p-4 shadow-inner shadow-teal-900/[0.03] backdrop-blur-sm">
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-700/90">AI understood</p>
       <div className="flex flex-wrap gap-2">
         {chips.map((chip, i) => (
           <span
             key={i}
-            className="inline-flex items-center gap-1 bg-white border border-blue-200 text-blue-900 rounded-lg px-3 py-1 text-sm"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/70 bg-white/90 px-3 py-1.5 text-sm text-slate-800 shadow-sm shadow-teal-900/[0.04]"
           >
-            <span className="text-blue-400 text-xs font-medium">{chip.label}:</span>
+            <span className="text-xs font-medium lowercase text-teal-600">{chip.label}:</span>
             {chip.value}
           </span>
         ))}
