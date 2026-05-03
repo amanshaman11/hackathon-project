@@ -15,12 +15,14 @@ export const dynamic = 'force-dynamic';
 
 type MatchRequestBody = {
   description?: string;
+  country?: string;
 };
 
 async function loadCandidateTrialsFromClinicalTrialsGov(
   profile: PatientProfile,
+  country?: string,
 ): Promise<{ trials: Trial[]; source: 'clinicaltrials.gov' | 'mock_fallback' }> {
-  const primaryParams = buildMatchListSearchParams(profile);
+  const primaryParams = buildMatchListSearchParams(profile, country);
 
   try {
     const first = await fetchStudiesFromCtGov(primaryParams);
@@ -83,7 +85,7 @@ export async function POST(request: Request) {
     const patient = aiPatient ?? heuristicPatient;
 
     const { trials: candidateTrials, source: trialSource } =
-      await loadCandidateTrialsFromClinicalTrialsGov(patient);
+      await loadCandidateTrialsFromClinicalTrialsGov(patient, body.country?.trim() || undefined);
 
     const baseMatches = buildMatches(patient, candidateTrials);
     const aiMatches = isGeminiConfigured()

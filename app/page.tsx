@@ -99,8 +99,10 @@ const FEATURES = [
 export default function Home() {
   const router = useRouter();
 
-  function handleSubmit(description: string) {
-    router.push(`/search?q=${encodeURIComponent(description)}`);
+  function handleSubmit(description: string, country: string) {
+    const params = new URLSearchParams({ q: description });
+    if (country) params.set('country', country);
+    router.push(`/search?${params.toString()}`);
   }
 
   return (
@@ -141,8 +143,8 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="mx-auto max-w-2xl rounded-3xl border border-white/70 bg-white/90 p-1 shadow-xl shadow-teal-900/[0.07] backdrop-blur-md animate-hero-rise [animation-delay:300ms]">
-              <div className="rounded-[1.35rem] border border-slate-100 bg-white/98 p-5 sm:p-6">
+            <div className="mx-auto max-w-2xl rounded-3xl bg-white/90 p-1 shadow-xl shadow-teal-900/[0.07] backdrop-blur-md animate-hero-rise [animation-delay:300ms]">
+              <div className="rounded-[1.35rem] bg-white/98 p-5 sm:p-6">
                 <InputForm onSubmit={handleSubmit} isLoading={false} />
               </div>
             </div>

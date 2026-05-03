@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { TrialRow } from '@/components/TrialRow';
 import { PatientProfileChips } from '@/components/PatientProfileChips';
+import { InputForm } from '@/components/InputForm';
 import { Footer } from '@/components/Footer';
 import { HomeSideRails } from '@/components/HomeSideRails';
 import { AppNav } from '@/components/AppNav';
@@ -32,6 +33,7 @@ function SearchResults() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const query = searchParams.get('q') ?? '';
+  const country = searchParams.get('country') ?? '';
   const [state, setState] = useState<State>({ status: 'loading' });
 
   useEffect(() => {
@@ -43,11 +45,11 @@ function SearchResults() {
     fetch('/api/match', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ description: query }),
+      body: JSON.stringify({ description: query, country: country || undefined }),
     })
       .then((res) => {
         if (!res.ok)
-          return res.json().then((e) => {
+          return res.json().then((e: { error?: string }) => {
             throw new Error(e.error ?? `Server error ${res.status}`);
           });
         return res.json() as Promise<MatchResponse>;
@@ -56,50 +58,47 @@ function SearchResults() {
       .catch((err) =>
         setState({ status: 'error', message: err instanceof Error ? err.message : 'Something went wrong' }),
       );
-  }, [query, router]);
+  }, [query, country, router]);
+
+  function handleReSearch(description: string, newCountry: string) {
+    const params = new URLSearchParams({ q: description });
+    if (newCountry) params.set('country', newCountry);
+    router.push(`/search?${params.toString()}`);
+  }
 
   return (
     <div className="relative mx-auto max-w-5xl px-4 pb-14 pt-8 sm:px-6 md:px-8">
-      <div className="mb-10">
-        <button
-          type="button"
-          onClick={() => router.push('/')}
-          className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 transition-colors hover:text-teal-700"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-          </svg>
-          New search
-        </button>
-        <div className="rounded-2xl border border-teal-200/60 bg-white/85 p-4 shadow-lg shadow-teal-900/[0.05] backdrop-blur-md">
-          <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-teal-600/90">Searching for</p>
-          <p className="font-display text-[15px] leading-relaxed text-slate-800 sm:text-base">{query}</p>
-        </div>
+
+      {/* Re-search form at top */}
+      <div className="mb-8 rounded-3xl bg-white/90 p-5 shadow-xl shadow-teal-900/[0.07] backdrop-blur-md sm:p-6">
+        <InputForm
+          onSubmit={handleReSearch}
+          isLoading={state.status === 'loading'}
+          defaultValue={query}
+          defaultCountry={country}
+        />
       </div>
 
+      {/* Loading skeleton */}
       {state.status === 'loading' && (
         <div className="space-y-4">
-          <div className="h-24 animate-pulse rounded-2xl bg-gradient-to-r from-teal-100/80 via-teal-50 to-blue-50/70" />
+          <div className="h-20 animate-pulse rounded-2xl bg-gradient-to-r from-teal-100/80 via-teal-50 to-blue-50/70" />
           {[1, 2, 3, 4].map((i) => (
             <RowSkeleton key={i} />
           ))}
         </div>
       )}
 
+      {/* Error */}
       {state.status === 'error' && (
         <div className="rounded-2xl border border-red-100 bg-red-50/90 p-8 text-center shadow-sm backdrop-blur-sm">
           <p className="font-display mb-1 text-lg font-semibold text-red-800">Could not fetch results</p>
-          <p className="mb-6 text-sm text-red-600/90">{state.message}</p>
-          <button
-            type="button"
-            onClick={() => router.push('/')}
-            className="text-sm font-medium text-teal-700 underline decoration-teal-300 underline-offset-2 hover:text-teal-900"
-          >
-            Go back and try again
-          </button>
+          <p className="mb-4 text-sm text-red-600/90">{state.message}</p>
+          <p className="text-xs text-red-400">Edit your search above and try again.</p>
         </div>
       )}
 
+      {/* Results */}
       {state.status === 'success' && (
         <div className="space-y-6">
           <PatientProfileChips profile={state.data.patient} />
@@ -108,16 +107,10 @@ function SearchResults() {
             <div className="rounded-2xl border border-slate-100 bg-white/90 p-10 text-center shadow-lg shadow-teal-900/[0.04] backdrop-blur-md">
               <p className="mb-3 text-4xl">🔍</p>
               <p className="font-display mb-2 text-xl font-semibold text-slate-900">No matching trials found</p>
-              <p className="mx-auto mb-6 max-w-sm text-sm leading-relaxed text-slate-500">
+              <p className="mx-auto mb-2 max-w-sm text-sm leading-relaxed text-slate-500">
                 Try adding more detail — stage, prior treatments, or age often help narrow the match.
               </p>
-              <button
-                type="button"
-                onClick={() => router.push('/')}
-                className="text-sm font-medium text-teal-700 underline decoration-teal-300 underline-offset-2 hover:text-teal-900"
-              >
-                Try a new search
-              </button>
+              <p className="text-xs text-slate-400">Edit your description in the search box above.</p>
             </div>
           ) : (
             <>
@@ -164,7 +157,7 @@ export default function SearchPage() {
       <Suspense
         fallback={
           <div className="relative mx-auto max-w-5xl space-y-4 px-4 pb-14 pt-8 sm:px-6 md:px-8">
-            <div className="h-10 w-32 animate-pulse rounded-lg bg-slate-200/80" />
+            <div className="mb-8 h-40 animate-pulse rounded-3xl bg-white/80 shadow-xl shadow-teal-900/[0.06]" />
             <RowSkeleton />
             <RowSkeleton />
             <RowSkeleton />

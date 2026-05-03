@@ -14,11 +14,12 @@ export function buildEssieQueryCondFromProfile(profile: PatientProfile): string 
 }
 
 /** Default search params for recruiting trials used by POST /api/match. */
-export function buildMatchListSearchParams(profile: PatientProfile): URLSearchParams {
+export function buildMatchListSearchParams(profile: PatientProfile, country?: string): URLSearchParams {
   const params = new URLSearchParams();
   params.set('filter.overallStatus', 'RECRUITING');
   params.set('pageSize', '40');
   const cond = buildEssieQueryCondFromProfile(profile);
   if (cond) params.set('query.cond', cond);
+  if (country) params.set('query.locn', country);
   return params;
 }

@@ -102,6 +102,47 @@
   animation: side-dot-ring 3.8s ease-in-out infinite;
 }
 
+/* ── Textarea traveling-border animation ── */
+@property --ta-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes ta-spin {
+  to { --ta-angle: 360deg; }
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.textarea-glow-wrap {
+  padding: 2px;
+  border-radius: 0.75rem;
+  background: conic-gradient(
+    from var(--ta-angle),
+    #14b8a6 0%,
+    #3b82f6 25%,
+    #818cf8 50%,
+    #06b6d4 75%,
+    #14b8a6 100%
+  );
+  animation: ta-spin 4s linear infinite;
+}
+
+.textarea-glow-inner {
+  border-radius: calc(0.75rem - 2px);
+  background: white;
+  width: 100%;
+  height: 100%;
+}
+
+.cursor-blink {
+  animation: cursor-blink 0.85s step-start infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-hero-rise {
     opacity: 1 !important;

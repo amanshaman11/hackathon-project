@@ -9,7 +9,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ['var(--font-dm-sans)', 'system-ui', 'sans-serif'],
-        display: ['var(--font-fraunces)', 'Georgia', 'serif'],
+        display: ['var(--font-outfit)', 'system-ui', 'sans-serif'],
       },
       animation: {
         'hero-rise': 'hero-rise 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards',
